@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { useWebsiteSettings } from "@/context/WebsiteSettingsContext";
+import { getApiBase } from "@/lib/api";
 
 export default function ClosedOverlay() {
   const settings = useWebsiteSettings();
@@ -12,9 +13,9 @@ export default function ClosedOverlay() {
   // Client-side fetch to bypass Next.js cache and get fresh is_open status
   useEffect(() => {
     if (pathname?.startsWith("/admin")) return;
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-    if (!apiUrl) return;
-    fetch(`${apiUrl}/api/public/website-settings`, { cache: "no-store" })
+    const base = getApiBase();
+    if (!base) return;
+    fetch(`${base}/api/public/website-settings`, { cache: "no-store" })
       .then((r) => (r.ok ? r.json() : null))
       .then((d) => d && setIsOpenFromApi(d.is_open ?? true))
       .catch(() => setIsOpenFromApi(true));

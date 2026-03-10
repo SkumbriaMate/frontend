@@ -1,5 +1,7 @@
 "use client";
 
+import { getApiBase } from "@/lib/api";
+
 import { useEffect, useState, useCallback, useRef } from "react";
 import { Star, X } from "lucide-react";
 import { useWebsiteSettings } from "@/context/WebsiteSettingsContext";
@@ -75,7 +77,7 @@ export default function ReviewsSection() {
   const companyId = settings?.company_id ?? null;
 
   useEffect(() => {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+    const apiUrl = getApiBase();
     if (!apiUrl) {
       setLoading(false);
       return;
@@ -134,7 +136,7 @@ export default function ReviewsSection() {
     async (e: React.FormEvent) => {
       e.preventDefault();
       if (!companyId || !formName.trim()) return;
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      const apiUrl = getApiBase();
       if (!apiUrl) return;
       setFormSubmitting(true);
       try {

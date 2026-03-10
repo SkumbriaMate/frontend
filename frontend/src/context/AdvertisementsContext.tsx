@@ -3,6 +3,7 @@
 import { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { usePathname } from "next/navigation";
 import { useWebsiteSettings } from "./WebsiteSettingsContext";
+import { getApiBase } from "@/lib/api";
 
 const PATH_TO_PLACEMENT: Record<string, string> = {
   "/": "home",
@@ -49,10 +50,10 @@ export function AdvertisementsProvider({ children }: { children: React.ReactNode
       return;
     }
 
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-    if (!apiUrl) return;
+    const base = getApiBase();
+    if (!base) return;
 
-    fetch(`${apiUrl}/api/public/advertisements?company_id=${companyId}&placement=${placement}`)
+    fetch(`${base}/api/public/advertisements?company_id=${companyId}&placement=${placement}`)
       .then((r) => (r.ok ? r.json() : { advertisements: [] }))
       .then((d) => {
         const filtered = d.advertisements || [];
@@ -71,10 +72,10 @@ export function AdvertisementsProvider({ children }: { children: React.ReactNode
 
   const trackImpression = useCallback(
     async (ad: Ad, section = "content") => {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      if (!apiUrl) return;
+      const base = getApiBase();
+      if (!base) return;
       try {
-        await fetch(`${apiUrl}/api/public/advertisements/track`, {
+        await fetch(`${base}/api/public/advertisements/track`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -93,10 +94,10 @@ export function AdvertisementsProvider({ children }: { children: React.ReactNode
 
   const trackClick = useCallback(
     async (ad: Ad, section = "content") => {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      if (!apiUrl) return;
+      const base = getApiBase();
+      if (!base) return;
       try {
-        await fetch(`${apiUrl}/api/public/advertisements/track`, {
+        await fetch(`${base}/api/public/advertisements/track`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({

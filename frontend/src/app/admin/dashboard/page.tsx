@@ -3,6 +3,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { useEffect, useState, useCallback, useRef } from "react";
+import { getApiBase } from "@/lib/api";
 import { useRouter } from "next/navigation";
 import {
   Calendar, Database, Settings, LogOut, Pencil, Trash2, Timer,
@@ -158,7 +159,7 @@ export default function AdminDashboardPage() {
   const handleConfirmReservation = async (id: string) => {
     setReservationActionId(`${id}-confirm`);
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      const apiUrl = getApiBase();
       const r = await fetch(`${apiUrl}/api/admin/reservations/${id}/confirm`, {
         method: "PATCH", headers: { "Content-Type": "application/json", Authorization: `Bearer ${localStorage.getItem("admin_token")}` },
       });
@@ -170,7 +171,7 @@ export default function AdminDashboardPage() {
     if (!(await confirm({ message: "ნამდვილებელ გსურთ გააუქმოთ?", danger: true }))) return;
     setReservationActionId(`${id}-cancel`);
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      const apiUrl = getApiBase();
       const r = await fetch(`${apiUrl}/api/admin/reservations/${id}/cancel`, {
         method: "PATCH", headers: { "Content-Type": "application/json", Authorization: `Bearer ${localStorage.getItem("admin_token")}` },
       });
@@ -182,7 +183,7 @@ export default function AdminDashboardPage() {
     if (!(await confirm({ message: "ნამდვილად გსურთ რეზერვაციის წაშლა?", danger: true }))) return;
     setReservationActionId(`${id}-delete`);
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      const apiUrl = getApiBase();
       const r = await fetch(`${apiUrl}/api/admin/reservations/${id}`, {
         method: "DELETE", headers: { Authorization: `Bearer ${localStorage.getItem("admin_token")}` },
       });
@@ -196,7 +197,7 @@ export default function AdminDashboardPage() {
   const refetchDashboard = useCallback(async () => {
     const token = localStorage.getItem("admin_token");
     if (!token) return;
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+    const apiUrl = getApiBase();
     const r = await fetch(`${apiUrl}/api/admin/dashboard`, { headers: { Authorization: `Bearer ${token}` } });
     if (r.ok) { const d = await r.json(); if (!d.sessions) d.sessions = []; if (!d.website_settings) d.website_settings = null; if (!d.advertisements) d.advertisements = []; if (!d.game_banners) d.game_banners = []; if (!d.staff_permissions) d.staff_permissions = []; setData(d); }
   }, []);
@@ -206,7 +207,7 @@ export default function AdminDashboardPage() {
       const token = localStorage.getItem("admin_token");
       if (!token) { router.push("/admin"); return; }
       try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+        const apiUrl = getApiBase();
         const r = await fetch(`${apiUrl}/api/admin/dashboard`, { headers: { Authorization: `Bearer ${token}` } });
         if (!r.ok) { if (r.status === 401) { localStorage.removeItem("admin_token"); router.push("/admin"); return; } throw new Error("ჩატვირთვა ვერ მოხერხდა"); }
         const d = await r.json();
@@ -229,7 +230,7 @@ export default function AdminDashboardPage() {
     if (activeTab !== "history") return;
     const fetchHistory = async () => {
       const token = localStorage.getItem("admin_token");
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      const apiUrl = getApiBase();
       if (!token) return;
       setHistoryLoading(true);
       try {
@@ -244,7 +245,7 @@ export default function AdminDashboardPage() {
 
   useEffect(() => {
     if (!companyId) return;
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "";
+    const apiUrl = getApiBase() ?? "";
     const socket = makeIo(apiUrl, { transports: ["websocket"] });
     const refreshSessions = () => {
       const token = localStorage.getItem("admin_token");
@@ -296,7 +297,7 @@ export default function AdminDashboardPage() {
     setIsOpenSaving(true);
     try {
       const token = localStorage.getItem("admin_token");
-      const r = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/website-settings`, {
+      const r = await fetch(`${getApiBase()}/api/admin/website-settings`, {
         method: "PUT",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({ is_open: next }),
@@ -316,7 +317,7 @@ export default function AdminDashboardPage() {
   const handleToggleResourceStatus = async (resourceId: string, currentStatus: string) => {
     const newStatus = currentStatus === "available" ? "inactive" : "available";
     const token = localStorage.getItem("admin_token");
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+    const apiUrl = getApiBase();
     try {
       const r = await fetch(`${apiUrl}/api/admin/resources/${resourceId}`, { method: "PUT", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }, body: JSON.stringify({ status: newStatus }) });
       if (!r.ok) throw new Error("სტატუსის შეცვლა ვერ მოხერხდა");
@@ -328,7 +329,7 @@ export default function AdminDashboardPage() {
   const handleDeleteResource = async (resourceId: string) => {
     if (!(await confirm({ message: "ნამდვილად გსურთ წაშლა?", danger: true }))) return;
     const token = localStorage.getItem("admin_token");
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+    const apiUrl = getApiBase();
     try {
       const r = await fetch(`${apiUrl}/api/admin/resources/${resourceId}`, { method: "DELETE", headers: { Authorization: `Bearer ${token}` } });
       if (!r.ok) throw new Error("წაშლა ვერ მოხერხდა");
@@ -338,7 +339,7 @@ export default function AdminDashboardPage() {
 
   const makeOverrideHandler = useCallback((resId: string) => async () => {
     const token = localStorage.getItem("admin_token");
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+    const apiUrl = getApiBase();
     try {
       const r = await fetch(`${apiUrl}/api/admin/resources/${resId}/status`, { method: "PATCH", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }, body: JSON.stringify({ status: "available" }) });
       if (r.ok) setData(prev => prev ? { ...prev, resources: prev.resources.map(r => r.id === resId ? { ...r, status: "available" } : r) } : null);
@@ -702,7 +703,7 @@ export default function AdminDashboardPage() {
                                   const token = localStorage.getItem("admin_token");
                                   if (!token) { router.push("/admin"); return; }
                                   try {
-                                    const r = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/reviews/${rev.id}/status`, {
+                                    const r = await fetch(`${getApiBase()}/api/admin/reviews/${rev.id}/status`, {
                                       method: "PATCH", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
                                       body: JSON.stringify({ status: "approved" }),
                                     });
@@ -720,7 +721,7 @@ export default function AdminDashboardPage() {
                                   const token = localStorage.getItem("admin_token");
                                   if (!token) { router.push("/admin"); return; }
                                   try {
-                                    const r = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/reviews/${rev.id}/status`, {
+                                    const r = await fetch(`${getApiBase()}/api/admin/reviews/${rev.id}/status`, {
                                       method: "PATCH", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
                                       body: JSON.stringify({ status: "rejected" }),
                                     });
@@ -741,7 +742,7 @@ export default function AdminDashboardPage() {
                               const token = localStorage.getItem("admin_token");
                               if (!token) { router.push("/admin"); return; }
                               try {
-                                const r = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/reviews/${rev.id}`, { method: "DELETE", headers: { Authorization: `Bearer ${token}` } });
+                                const r = await fetch(`${getApiBase()}/api/admin/reviews/${rev.id}`, { method: "DELETE", headers: { Authorization: `Bearer ${token}` } });
                                 if (r.status === 401) { localStorage.removeItem("admin_token"); router.push("/admin"); return; }
                                 if (r.ok && data) setData({ ...data, reviews: data.reviews.filter(rv => rv.id !== rev.id) });
                                 toast.success("მიმოხილვა წაშლილია");
@@ -886,7 +887,7 @@ export default function AdminDashboardPage() {
                         setHistoryLoading(true);
                         try {
                           const token = localStorage.getItem("admin_token");
-                          const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+                          const apiUrl = getApiBase();
                           const r = await fetch(`${apiUrl}/api/admin/sessions?date=${historyDate}`, { headers: { Authorization: `Bearer ${token}` } });
                           if (r.ok) { const { sessions } = await r.json(); setData(prev => prev ? { ...prev, sessions } : null); }
                         } finally { setHistoryRefreshing(false); setHistoryLoading(false); }
@@ -978,7 +979,7 @@ export default function AdminDashboardPage() {
                       if (!token) { router.push("/admin"); return; }
                       setCompanyNameSaving(true);
                       try {
-                        const r = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/website-settings`, { method: "PUT", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }, body: JSON.stringify({ site_name: companyNameInput }) });
+                        const r = await fetch(`${getApiBase()}/api/admin/website-settings`, { method: "PUT", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }, body: JSON.stringify({ site_name: companyNameInput }) });
                         if (r.status === 401) { localStorage.removeItem("admin_token"); router.push("/admin"); return; }
                         const result = await r.json();
                         if (!r.ok) throw new Error(result.error || "შეცდომა");
@@ -1007,7 +1008,7 @@ export default function AdminDashboardPage() {
                         try {
                           const fd = new FormData();
                           fd.append("image", heroFile);
-                          const r = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/company/hero-image`, { method: "POST", headers: { Authorization: `Bearer ${token}` }, body: fd });
+                          const r = await fetch(`${getApiBase()}/api/admin/company/hero-image`, { method: "POST", headers: { Authorization: `Bearer ${token}` }, body: fd });
                           if (r.status === 401) { localStorage.removeItem("admin_token"); router.push("/admin"); return; }
                           if (!r.ok) throw new Error((await r.json()).error || "შეცდომა");
                           const { website_settings: ws } = await r.json();
@@ -1038,7 +1039,7 @@ export default function AdminDashboardPage() {
                         if (!token) { router.push("/admin"); return; }
                         setLogoHeightSaving(true);
                         try {
-                          const r = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/website-settings`, { method: "PUT", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }, body: JSON.stringify({ logo_height: Math.min(120, Math.max(24, parseInt(logoHeightInput, 10) || 48)) }) });
+                          const r = await fetch(`${getApiBase()}/api/admin/website-settings`, { method: "PUT", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }, body: JSON.stringify({ logo_height: Math.min(120, Math.max(24, parseInt(logoHeightInput, 10) || 48)) }) });
                           if (r.status === 401) { localStorage.removeItem("admin_token"); router.push("/admin"); return; }
                           const result = await r.json();
                           if (!r.ok) throw new Error(result.error || "შეცდომა");
@@ -1057,7 +1058,7 @@ export default function AdminDashboardPage() {
                         try {
                           const fd = new FormData();
                           fd.append("image", logoFile);
-                          const r = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/company/logo`, { method: "POST", headers: { Authorization: `Bearer ${token}` }, body: fd });
+                          const r = await fetch(`${getApiBase()}/api/admin/company/logo`, { method: "POST", headers: { Authorization: `Bearer ${token}` }, body: fd });
                           if (r.status === 401) { localStorage.removeItem("admin_token"); router.push("/admin"); return; }
                           if (!r.ok) throw new Error((await r.json()).error || "შეცდომა");
                           const { website_settings: ws } = await r.json();
@@ -1086,7 +1087,7 @@ export default function AdminDashboardPage() {
                       const fd = new FormData();
                       fd.append("image", galleryFile);
                       fd.append("title", galleryTitle);
-                      const r = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/company-images`, {
+                      const r = await fetch(`${getApiBase()}/api/admin/company-images`, {
                         method: "POST",
                         headers: { Authorization: `Bearer ${token}` },
                         body: fd,
@@ -1136,7 +1137,7 @@ export default function AdminDashboardPage() {
                             if (!(await confirm({ message: "წაშალოთ ფოტო?", danger: true }))) return;
                             const token = localStorage.getItem("admin_token");
                             if (!token) { router.push("/admin"); return; }
-                            const r = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/company-images/${img.id}`, {
+                            const r = await fetch(`${getApiBase()}/api/admin/company-images/${img.id}`, {
                               method: "DELETE",
                               headers: { Authorization: `Bearer ${token}` },
                             });
@@ -1183,7 +1184,7 @@ export default function AdminDashboardPage() {
                       const fd = new FormData();
                       fd.append("image", gameBannerFile);
                       fd.append("title", gameBannerTitle);
-                      const r = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/game-banners`, {
+                      const r = await fetch(`${getApiBase()}/api/admin/game-banners`, {
                         method: "POST",
                         headers: { Authorization: `Bearer ${token}` },
                         body: fd,
@@ -1236,7 +1237,7 @@ export default function AdminDashboardPage() {
                             if (!(await confirm({ message: "წაშალოთ ბანერი?", danger: true }))) return;
                             const token = localStorage.getItem("admin_token");
                             if (!token) { router.push("/admin"); return; }
-                            const r = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/game-banners/${b.id}`, {
+                            const r = await fetch(`${getApiBase()}/api/admin/game-banners/${b.id}`, {
                               method: "DELETE",
                               headers: { Authorization: `Bearer ${token}` },
                             });
@@ -1375,7 +1376,7 @@ export default function AdminDashboardPage() {
                     if (!token) { router.push("/admin"); return; }
                     setStaffSaving(true);
                     try {
-                      const r = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/staff`, {
+                      const r = await fetch(`${getApiBase()}/api/admin/staff`, {
                         method: "POST",
                         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
                         body: JSON.stringify(staffForm),
@@ -1474,14 +1475,14 @@ export default function AdminDashboardPage() {
                                       setStaffEditId(sm.id);
                                       const token = localStorage.getItem("admin_token");
                                       if (!token) return;
-                                      const r = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/staff/${sm.id}/permissions`, { headers: { Authorization: `Bearer ${token}` } });
+                                      const r = await fetch(`${getApiBase()}/api/admin/staff/${sm.id}/permissions`, { headers: { Authorization: `Bearer ${token}` } });
                                       if (r.ok) { const d = await r.json(); setStaffEditPerms(d.permissions || []); }
                                     }} style={{ ...S.btnGhost, fontSize: 11, padding: "6px 10px", marginRight: 6 }}>რედაქტირება</button>
                                     <button onClick={async () => {
                                       if (!(await confirm({ message: `წაშალოთ ${sm.full_name}?`, danger: true }))) return;
                                       const token = localStorage.getItem("admin_token");
                                       if (!token) { router.push("/admin"); return; }
-                                      const r = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/staff/${sm.id}`, { method: "DELETE", headers: { Authorization: `Bearer ${token}` } });
+                                      const r = await fetch(`${getApiBase()}/api/admin/staff/${sm.id}`, { method: "DELETE", headers: { Authorization: `Bearer ${token}` } });
                                       if (r.status === 401) { localStorage.removeItem("admin_token"); router.push("/admin"); return; }
                                       if (r.ok) {
                                         setData(prev => prev ? { ...prev, staff_members: (prev.staff_members || []).filter((s: any) => s.id !== sm.id), staff_permissions: (prev.staff_permissions || []).filter((p: any) => p.staff_member_id !== sm.id) } : null);
@@ -1539,7 +1540,7 @@ export default function AdminDashboardPage() {
                           if (!token) return;
                           setStaffEditSaving(true);
                           try {
-                            const r = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/staff/${staffEditId}`, {
+                            const r = await fetch(`${getApiBase()}/api/admin/staff/${staffEditId}`, {
                               method: "PUT",
                               headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
                               body: JSON.stringify({ section_keys: staffEditPerms }),
@@ -1610,7 +1611,7 @@ function CompanyInfoEditor({ company, websiteSettings, role, onUpdate }: { compa
     setSaving(true);
     try {
       const token = localStorage.getItem("admin_token");
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      const apiUrl = getApiBase();
       const headers = { "Content-Type": "application/json", Authorization: `Bearer ${token}` };
       const companyPayload = { name: formData.name, description: formData.description, phone: formData.phone, email: formData.email, address: formData.address, city: formData.city, currency_code: formData.currency_code, timezone: formData.timezone };
       const wsPayload = { about_intro: formData.about_intro, facebook_url: formData.facebook_url || null, instagram_url: formData.instagram_url || null, maps_url: formData.maps_url || null, opening_hours: formData.opening_hours || null };

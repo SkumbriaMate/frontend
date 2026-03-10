@@ -21,11 +21,13 @@ export type WebsiteSettings = {
     is_open?: boolean;
 };
 
+import { getApiBase } from "./api";
+
 export async function fetchWebsiteSettings(): Promise<WebsiteSettings | null> {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-    if (!apiUrl) return null;
+    const base = getApiBase();
+    if (!base) return null;
     try {
-        const res = await fetch(`${apiUrl}/api/public/website-settings`, {
+        const res = await fetch(`${base}/api/public/website-settings`, {
             next: { revalidate: 10 }, // 10s - so is_open toggle updates quickly
         });
         if (!res.ok) return null;

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { getApiBase } from "@/lib/api";
 import EventCard from "@/components/EventCard";
 import NormalAdSlot from "@/components/NormalAdSlot";
 
@@ -21,7 +22,7 @@ export default function EventsPage() {
     useEffect(() => {
         const fetchEvents = async () => {
             try {
-                const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+                const apiUrl = getApiBase();
                 const response = await fetch(`${apiUrl}/api/public/events`);
                 if (!response.ok) throw new Error("Failed to fetch");
                 const data = await response.json();

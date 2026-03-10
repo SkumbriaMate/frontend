@@ -1,5 +1,7 @@
 "use client";
 
+import { getApiBase } from "@/lib/api";
+
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import ImageLightbox from "./ImageLightbox";
@@ -27,7 +29,7 @@ export default function AboutDeviceGallery() {
   useEffect(() => {
     (async () => {
       try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+        const apiUrl = getApiBase();
         if (!apiUrl) return;
 
         const companyImagesUrl = companyId

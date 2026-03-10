@@ -1,5 +1,7 @@
 "use client";
 
+import { getApiBase } from "@/lib/api";
+
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Play, X, Volume2, StopCircle } from "lucide-react";
 
@@ -198,7 +200,7 @@ export default function StationTimerCard({
     setIsConfiguring(false); setIsActive(true); setIsRunning(true); setIsFinished(false);
     setElapsedSeconds(elapsedFromSession({ start_at: sessionStartAtRef.current } as Session));
     const token = localStorage.getItem("admin_token");
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+    const apiUrl = getApiBase();
     if (!token) return;
     try {
       const resp = await fetch(`${apiUrl}/api/admin/sessions`, {
@@ -236,7 +238,7 @@ export default function StationTimerCard({
     if (!finishedId || finalElapsed === 0) return;
     setIsSaving(true);
     const token = localStorage.getItem("admin_token");
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+    const apiUrl = getApiBase();
     try {
       const resp = await fetch(`${apiUrl}/api/admin/sessions/${finishedId}/complete`, {
         method: "PATCH",

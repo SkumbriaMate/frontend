@@ -1,5 +1,7 @@
 "use client";
 
+import { getApiBase } from "@/lib/api";
+
 /* eslint-disable @next/next/no-img-element */
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
@@ -24,7 +26,7 @@ export default function GameBannersCarousel() {
   const trackRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+    const apiUrl = getApiBase();
     if (!apiUrl) {
       setLoading(false);
       return;

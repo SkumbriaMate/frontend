@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { getApiBase } from "@/lib/api";
 import Link from "next/link";
 import { Monitor, Circle, TableProperties, ArrowRight, Zap } from "lucide-react";
 import AvailabilityCard from "@/components/AvailabilityCard";
@@ -50,8 +51,8 @@ export default function HomePage() {
   const [, setLoading] = useState(true);
 
   const fetchData = useCallback(async () => {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-    if (!apiUrl) {
+    const base = getApiBase();
+    if (!base) {
       setLoading(false);
       return;
     }
@@ -60,12 +61,12 @@ export default function HomePage() {
       let resResponse: Response | null = null;
       let eventsResponse: Response | null = null;
       try {
-        resResponse = await fetch(`${apiUrl}/api/public/resources`);
+        resResponse = await fetch(`${base}/api/public/resources`);
       } catch (e) {
         console.warn("Resources fetch failed:", e);
       }
       try {
-        eventsResponse = await fetch(`${apiUrl}/api/public/events`);
+        eventsResponse = await fetch(`${base}/api/public/events`);
       } catch (e) {
         console.warn("Events fetch failed:", e);
       }
@@ -96,7 +97,7 @@ export default function HomePage() {
 
       if (cid) {
         try {
-          const imgRes = await fetch(`${apiUrl}/api/public/company-images?company_id=${cid}`);
+          const imgRes = await fetch(`${base}/api/public/company-images?company_id=${cid}`);
           if (imgRes.ok) {
             const { images } = await imgRes.json();
             setCompanyImages(images || []);
@@ -121,8 +122,9 @@ export default function HomePage() {
   // Live updates via socket
   useEffect(() => {
     if (!companyId) return;
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
-    const socket = makeIo(apiUrl, { transports: ["websocket"] });
+    const base = getApiBase();
+    if (!base) return;
+    const socket = makeIo(base, { transports: ["websocket"] });
 
     socket.on("connect", () => {
       socket.emit("join_company", companyId);

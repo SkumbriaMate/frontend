@@ -1,5 +1,7 @@
 "use client";
 
+import { getApiBase } from "@/lib/api";
+
 import { useState, useEffect, useRef } from "react";
 import { X, Trash2, ImagePlus } from "lucide-react";
 import { useToast } from "@/components/Toast";
@@ -151,7 +153,7 @@ export default function StationManagementModal({
 
         try {
             const token = localStorage.getItem("admin_token");
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+            const apiUrl = getApiBase();
             const pricePerHour = formData.pricing_mode === "ps_mode" ? null : formData.price_per_hour;
             const price1v1 = formData.pricing_mode === "ps_mode" ? formData.price_1v1 : null;
             const price2v2 = formData.pricing_mode === "ps_mode" ? formData.price_2v2 : null;
@@ -214,7 +216,7 @@ export default function StationManagementModal({
         if (!initialData || !(await confirm({ message: "ნამდვილად გსურთ სადგურის წაშლა?", danger: true }))) return;
         try {
             const token = localStorage.getItem("admin_token");
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+            const apiUrl = getApiBase();
             const response = await fetch(`${apiUrl}/api/admin/resources/${initialData.id}`, {
                 method: "DELETE",
                 headers: { Authorization: `Bearer ${token}` },

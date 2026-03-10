@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { getApiBase } from "@/lib/api";
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { 
@@ -71,7 +72,7 @@ export default function ReservePage() {
     useEffect(() => {
         const fetchResources = async () => {
             try {
-                const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+                const apiUrl = getApiBase();
                 const response = await fetch(`${apiUrl}/api/public/resources`);
                 if (response.ok) {
                     const data = await response.json();
@@ -192,7 +193,7 @@ export default function ReservePage() {
         setConflicts([]);
 
         try {
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+            const apiUrl = getApiBase();
             const response = await fetch(`${apiUrl}/api/public/reservations/check-availability`, {
                 method: 'POST',
                 headers: {
@@ -326,7 +327,7 @@ export default function ReservePage() {
         setIsSubmitting(true);
 
         try {
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+            const apiUrl = getApiBase();
             const response = await fetch(`${apiUrl}/api/public/reservations`, {
                 method: 'POST',
                 headers: {

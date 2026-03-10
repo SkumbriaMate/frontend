@@ -1,5 +1,7 @@
 "use client";
 
+import { getApiBase } from "@/lib/api";
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { useState } from "react";
@@ -18,7 +20,7 @@ export default function AdminLoginPage() {
     setError("");
     setLoading(true);
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      const apiUrl = getApiBase();
       const response = await fetch(`${apiUrl}/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },

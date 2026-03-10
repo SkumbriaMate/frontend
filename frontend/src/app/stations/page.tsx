@@ -1,5 +1,7 @@
 "use client";
 
+import { getApiBase } from "@/lib/api";
+
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { Monitor, Circle, TableProperties } from "lucide-react";
@@ -65,7 +67,7 @@ function StationsContent() {
 
     const fetchResources = async () => {
         try {
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+            const apiUrl = getApiBase();
             
             // Fetch both resources and sessions
             const [resourcesResponse, sessionsResponse] = await Promise.all([
@@ -141,7 +143,7 @@ function StationsContent() {
     // socket integration
     useEffect(() => {
         if (!companyId) return;
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
+        const apiUrl = getApiBase() || '';
         const socket = makeIo(apiUrl, { transports: ['websocket'] });
 
         socket.on('connect', () => {

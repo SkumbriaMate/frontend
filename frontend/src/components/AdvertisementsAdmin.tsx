@@ -1,5 +1,7 @@
 "use client";
 
+import { getApiBase } from "@/lib/api";
+
 /* eslint-disable @next/next/no-img-element */
 
 import { useState, useEffect } from "react";
@@ -87,7 +89,7 @@ export default function AdvertisementsAdmin({
     const token = localStorage.getItem("admin_token");
     if (!token) return;
     try {
-      const r = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/advertisements/analytics/summary`, {
+      const r = await fetch(`${getApiBase()}/api/admin/advertisements/analytics/summary`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (r.status === 401) {
@@ -182,7 +184,7 @@ export default function AdvertisementsAdmin({
         if (form.ad_type === "vip") fd.append("vip_interval_seconds", form.vip_interval_seconds || "60");
         if (imageFile) fd.append("image", imageFile);
 
-        const r = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/advertisements/${editing.id}`, {
+        const r = await fetch(`${getApiBase()}/api/admin/advertisements/${editing.id}`, {
           method: "PUT",
           headers: { Authorization: `Bearer ${token}` },
           body: fd,
@@ -206,7 +208,7 @@ export default function AdvertisementsAdmin({
         if (form.ad_type === "vip") fd.append("vip_interval_seconds", form.vip_interval_seconds || "60");
         fd.append("image", imageFile!);
 
-        const r = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/advertisements`, {
+        const r = await fetch(`${getApiBase()}/api/admin/advertisements`, {
           method: "POST",
           headers: { Authorization: `Bearer ${token}` },
           body: fd,
@@ -232,7 +234,7 @@ export default function AdvertisementsAdmin({
     const token = localStorage.getItem("admin_token");
     if (!token) return;
 
-    const r = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/advertisements/${ad.id}`, {
+    const r = await fetch(`${getApiBase()}/api/admin/advertisements/${ad.id}`, {
       method: "DELETE",
       headers: { Authorization: `Bearer ${token}` },
     });
